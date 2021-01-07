@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Potresi je aplikacija, s katero dobimo vpogled do informacij za zadnjih 5 potresov na območju Slovenije.">
+    <title>Potresi</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.0.2/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+    <link rel="apple-touch-icon" href="ico/apple-touch-icon.png">
+    <meta name="theme-color" content="#ef4444">
+    <meta name="msapplication-navbutton-color" content="#ef4444">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body class="bg-gray-800 font-sans">
+  <div id="app" class="min-h-screen flex justify-center items-center flex-col p-3">
+    <h2 class="mt-10 text-white font-extrabold text-xl">Potresi</h2>
+    <div id="container" 
+    v-for="(n, index) in 5" :key="index" 
+    class="bg-white rounded-lg w-96 border-t-8 rounded-lg p-3 mt-5" 
+    :class="['border-' + colors[index] + '-500']"
+    >
+      <h1 class="text-xl font-semibold text-center mb-2 relative">{{ (info) ? info.data[index].GEOLOC : '' }}
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-gray-100 animate-ping"></span></h1>
+      
+  
+
+      <hr class="p-3">
+
+      <div class="grid grid-cols-2 gap-2 mb-5">
+        <div>
+          <p 
+          class="text-center p-6 flex items-center justify-center rounded-full border-4 w-2 h-2 leading-none m-auto" 
+          :class="['border-' + colors[index] + '-500']"
+          >
+            <span class="font-bold text-xl">{{ (info) ? info.data[index].MAG1 : '' }}</span>
+          </p>
+        </div>
+        
+        <div>
+          <p><strong>UTC Čas:</strong> {{ (info) ? new Date(info.data[index].ORIGTIME).toLocaleTimeString() : '' }}</p>
+          <p><strong>Datum:</strong> {{ (info) ? new Date(info.data[index].ORIGTIME).toLocaleString('en-us', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/(\d+)\/(\d+)\/(\d+)/, '$1.$2.$3') : '' }}</p>
+        </div>
+      </div>
+      <hr class="p-3">
+      <p class="text-gray-500 text-xs text-center"><i>VPIS (ARSO): {{ (info) ? new Date(info.data[index].VPIS).toLocaleTimeString() : '' }} ({{ (info) ? new Date(info.data[index].VPIS).toLocaleDateString() : '' }})</i></p>
+    </div>
+    <p class="mt-4 mb-4 text-white text-xs">Izdelava: <a class="text-gray-300 hover:text-gray-100" title="Matej Novak" href="https://www.matejnovak.si">Matej Novak</a> Vir: <a class="text-gray-300 hover:text-gray-100" href="https://www.arso.gov.si/">Arso</a></p>
+  </div>
+</body>
+<script>
+  
+
+new Vue({
+    el: '#app',
+    data() {
+      return {
+        info: null,
+        colors: {
+          '0':'red',
+          '1':'pink',
+          '2':'yellow',
+          '3':'green',
+          '4':'blue',
+        }
+      }
+    },
+    created() {
+      axios
+        .get('repeater.php')
+        .then(response => {
+          this.info = response;
+        })
+        .catch((error) => {
+          this.error = 'Error! Could not reach the API. ' + error;
+        });
+    }
+});
+</script>
+
+<style>
+  @media only screen and (max-width: 600px) {
+    #container {
+      width: 100%!important;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+</style>
+</html>
